@@ -1,24 +1,55 @@
 
-import { ShortenerResponse } from '../types';
+import { ShortenerResponse, ApiResponse } from '../types';
+
+const API_URL = import.meta.env.API_URL;
+const API_KEY = import.meta.env.API_KEY;
 
 /**
- * Simulates a call to a backend API to shorten a URL.
+ * Calls the backend API to shorten a URL.
  * @param originalUrl The long URL to be shortened.
  * @returns A promise that resolves with the shortened URL data or rejects with an error.
  */
-export const shortenUrl = (originalUrl: string): Promise<ShortenerResponse> => {
-  return new Promise((resolve, reject) => {
-    // Simulate network latency of 1.5 seconds
-    setTimeout(() => {
-      // Simulate a random API failure to demonstrate error handling (20% chance of failure)
-      if (Math.random() < 0.2) {
-        reject(new Error('API Error: Could not process the request. Please try again.'));
-        return;
-      }
+export const shortenUrl = async (originalUrl: string): Promise<ShortenerResponse> => {
+  console.log('API_URL:', API_URL);
+  if (!API_URL) {
+    throw new Error('API configuration missing');
+  }
 
-      // On success, generate a random short ID and construct the short URL
-      const shortId = Math.random().toString(36).substring(2, 8);
-      resolve({ shortUrl: `https://shrt.li/${shortId}` });
-    }, 1500);
-  });
+  try {
+     console.log('Sending request to shorten URL:', originalUrl);
+     console.log('Sending request to API_URL:', API_URL);
+    const response = await fetch(`${API_URL}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`,
+      },
+      body: JSON.stringify({ originalUrl: originalUrl }),
+    });
+
+    const data: ApiResponse = await response.json();
+    console.log('📦 Backend response data:', data);
+    
+    // Handle API response structure
+    if (!response.ok) {
+      // If HTTP status is not ok, throw with backend message
+      throw new Error(data.message || `API Error: ${response.status} ${response.statusText}`);
+    }
+    
+    if (!data.success) {
+      // If backend indicates failure
+      throw new Error(data.message || 'Failed to shorten URL');
+    }
+    
+    const result = { 
+      shortUrl: data.data 
+    };
+    console.log('🔄 Mapped result:', result);
+    return result;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Failed to shorten URL. Please check your connection and try again.');
+  }
 };

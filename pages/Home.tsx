@@ -3,10 +3,11 @@ import React from 'react';
 import { UrlForm } from '../components/UrlForm';
 import { ResultCard } from '../components/ResultCard';
 import { Spinner } from '../components/common/Spinner';
+import { Message } from '../components/common/Message';
 import { useShortenUrl } from '../hooks/useShortenUrl';
 
 export const HomePage: React.FC = () => {
-  const { data, error, isLoading, shortenUrl } = useShortenUrl();
+  const { data, error, successMessage, isLoading, shortenUrl } = useShortenUrl();
 
   return (
     <div className="w-full max-w-2xl text-center">
@@ -21,9 +22,10 @@ export const HomePage: React.FC = () => {
         <UrlForm onSubmit={shortenUrl} isLoading={isLoading} />
       </div>
 
-      <div className="mt-8 min-h-[100px] flex items-center justify-center">
+      <div className="mt-8 min-h-[100px] flex flex-col items-center justify-center gap-4">
         {isLoading && <Spinner />}
-        {error && <p className="text-red-400 bg-red-900/20 px-4 py-2 rounded-md">{error}</p>}
+        {error && <Message message={error} type="error" />}
+        {successMessage && data && <Message message={successMessage} type="success" />}
         {data && <ResultCard shortUrl={data.shortUrl} />}
       </div>
     </div>
