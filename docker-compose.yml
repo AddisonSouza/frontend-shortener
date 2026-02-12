@@ -1,0 +1,11 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        API_URL: ${API_URL}
+        API_KEY: ${API_KEY}
+    ports:
+      - "5153:80"
+    restart: unless-stopped
