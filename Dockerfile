@@ -13,6 +13,13 @@ COPY package.json package-lock.json* ./
 RUN npm install
 
 COPY . .
+
+# Remove any .env files to ensure build args are used
+RUN rm -f .env .env.* 2>/dev/null || true
+
+# Debug: show env vars during build (remove after confirming it works)
+RUN echo "Building with VITE_API_URL=$VITE_API_URL"
+
 RUN npm run build
 
 # --- Production ---
