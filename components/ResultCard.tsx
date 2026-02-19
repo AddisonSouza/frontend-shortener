@@ -10,14 +10,20 @@ interface ResultCardProps {
 export const ResultCard: React.FC<ResultCardProps> = ({ shortUrl }) => {
   const [isCopied, setIsCopied] = useState(false);
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(shortUrl);
-      setIsCopied(true);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-      // You could add user feedback here, e.g., an alert or toast message
-    }
+  // TODO: Replace execCommand with navigator.clipboard API once SSL is configured
+  // execCommand is deprecated but works on HTTP. navigator.clipboard requires HTTPS.
+  const handleCopy = () => {
+    const textArea = document.createElement('textarea');
+    textArea.value = shortUrl;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    setIsCopied(true);
   };
 
   useEffect(() => {
